@@ -1,36 +1,53 @@
-name: Build Android APK
+from pathlib import Path
+import zipfile
+
+yaml = """name: Build Android APK
+
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    steps:
       - name: Checkout source
         uses: actions/checkout@v4
-        - name: Set up Java
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: "17"
 
-  - name: Set up Android SDK
-    uses: android-actions/setup-android@v3
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-  - name: Install Android platform and build tools
-    run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
 
-  - name: Set up Gradle
-    uses: gradle/actions/setup-gradle@v4
-    with:
-      gradle-version: "8.9"
+      - name: Install Android platform and build tools
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
-  - name: Build Android APK
-    run: gradle assembleDebug
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
-  - name: Upload APK
-    uses: actions/upload-artifact@v4
-    with:
-      name: Video-Stahovac-APK
-      path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Build Android APK
+        run: gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Video-Stahovac-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+"""
+base = Path("/mnt/data/build-apk-yml-zip")
+(base / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+(base / ".github" / "workflows" / "build-apk.yml").write_text(yaml, encoding="utf-8")
+zip_path = Path("/mnt/data/build-apk-yml.zip")
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    z.write(base / ".github" / "workflows" / "build-apk.yml",
+            ".github/workflows/build-apk.yml")
+print(zip_path)
