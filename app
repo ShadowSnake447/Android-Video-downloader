@@ -1,1 +1,1 @@
-app/build.gradle
+.app
