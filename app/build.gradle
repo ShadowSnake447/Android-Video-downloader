@@ -1,0 +1,1 @@
+plugins { id 'com.android.application android { namespace 'com.videostahovac' compileSdk 35 defaultConfig { applicationId 'com.videostahovac' minSdk 24 targetSdk 35 versionCode 1 versionName '1.0' } }
